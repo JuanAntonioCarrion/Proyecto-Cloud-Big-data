@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 
-conf = SparkConf().setMaster('local[*]').setAppName('plantilla.py')
+conf = SparkConf().setMaster('local[*]').setAppName('plantilla.py')  #cambiar por nombre de app
 sc = SparkContext(conf = conf)
 spark = SparkSession(sc)
 
@@ -100,15 +100,16 @@ result_positive.to_csv('relevantes_positive.csv', header=False, index=False)
 df.sort_values(by=['negative'], inplace=True, ascending = False)
 result_positive = df['words'][:20]
 result_positive.to_csv('relevantes_negative.csv', header=False, index=False)
-# Patron 4: Aspectos importantes competencias a su alrededor
 
+
+# Patron 4: Aspectos importantes competencias a su alrededor
 # filtrado
 hotelAvgRating = float(hotelFirstRow[3])
 higherRatingdf = filtereddf.filter(col("Average_Score") > hotelAvgRating)
 
 #word counter o patron 2
-wordsrdd = higherRatingdf.select("Positive_Review").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split()).map(lambda x: (str(x.lower()), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
-wordsrdd.saveAsTextFile("patron4.txt")
+#wordsrdd = higherRatingdf.select("Positive_Review").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split()).map(lambda x: (str(x.lower()), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
+#wordsrdd.saveAsTextFile("patron4.txt")
 
 
 #Patron 5
