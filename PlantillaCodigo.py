@@ -38,17 +38,17 @@ def HaversineDistance(lat1c, lat2c, lon1c, lon2c):
 #hotel_Name = sys.argv[1]   
 hotel_Name = "Hotel Arena"
 # necesario inicializar a parametro de entrada del programa  argv[2]
-#distancia = sys.argv[2]
+#distancia = int(sys.argv[2])
 distancia = 100
 # busca la primera fila del hotel y obtiene coordenadas del centro del circulo
 hotelFirstRow = reviewsdf.filter(col("Hotel_Name") == hotel_Name).first()
-latitudectr = float (hotelFirstRow[-2])
-longitudectr = float(hotelFirstRow[-1])
+latitudectr = float (hotelFirstRow.lat)
+longitudectr = float(hotelFirstRow.lng)
 
 # filtramos los hoteles en el area
 
 reviewsrdd = reviewsdf.rdd
-filteredrdd = reviewsrdd.filter(lambda x: HaversineDistance(latitudectr, float(x[-2]), longitudectr, float(x[-1])) <= distancia)
+filteredrdd = reviewsrdd.filter(lambda x: HaversineDistance(latitudectr, float(x.lat), longitudectr, float(x.lng)) <= distancia)
 filtereddf = filteredrdd.toDF()
 
 
@@ -114,10 +114,10 @@ def mlib_naivebayeclf(input_array):
 
 # Patron 1
 filtereddf.createOrReplaceTempView("temp")
-ret  = spark.sql("select Hotel_Address,Hotel_Name,lat,lng,Average_Score,avg(Reviewer_Score),avg(Total_Number_of_Reviews_Reviewer_Has_Given),Reviewer_Nationality,count(Reviewer_Nationality) as Num_Client_of_Nationality from temp group by Hotel_Address,Reviewer_Nationality,Hotel_Name,lat,lng,Average_Score order by Hotel_Name ASC").coalesce(1).write.format("csv").option("header","true").save(hotel_Name + " " + str(distancia))
+ret  = spark.sql("select Hotel_Name,Reviewer_Nationality,count(Reviewer_Nationality) as Num_Client_of_Nationality,Average_Score as Hotel_Average_Score,avg(Reviewer_Score) as Reviewers_Average_Score,avg(Total_Number_of_Reviews_Reviewer_Has_Given) as Average_Number_of_Reviews from temp group by Reviewer_Nationality,Hotel_Name,Average_Score order by Hotel_Name ASC").repartition(1).write.format("csv").option("header","true").mode('overwrite').save(hotel_Name + " " + str(distancia))
 #preguntar
 nationalityrdd = filtereddf.select("Reviewer_Nationality").rdd.map(lambda x: x[0]).map(lambda x: (str(x).strip(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
-nationalityrdd.coalesce(1).toDF().withColumnRenamed("_1", "Reviewer Nationality").withColumnRenamed("_2", "Count").write.format("csv").save("patron1.csv")
+nationalityrdd.repartition(1).toDF().withColumnRenamed("_1", "Reviewer Nationality").withColumnRenamed("_2", "Count").write.format("csv").mode('overwrite').save("patron1.csv")
 
 
 
@@ -170,6 +170,6 @@ result_positive.to_csv('relevantes_positive_MEJORES.csv', header=False, index=Fa
 
 #Patron 5
 tagsrdd = filtereddf.withColumn("Tags", regexp_replace(col("Tags"), "[\[\]']", "")).select("Tags").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split(",")).map(lambda x: (str(x.lower()).strip().capitalize(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
-tagsrdd.coalesce(1).toDF().withColumnRenamed("_1", "Tags").withColumnRenamed("_2", "Count").write.format("csv").save("patron5.csv")
+tagsrdd.repartition(1).toDF().withColumnRenamed("_1", "Tags").withColumnRenamed("_2", "Count").write.format("csv").mode('overwrite').save("patron5.csv")
 
 
