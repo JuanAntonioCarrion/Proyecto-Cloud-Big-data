@@ -35,11 +35,11 @@ def HaversineDistance(lat1c, lat2c, lon1c, lon2c):
 
 
 # necesario inicializar a parametro de entrada del programa  argv[1] 
-hotel_Name = sys.argv[1]   
-#hotel_Name = "Hotel Arena"
+#hotel_Name = sys.argv[1]   
+hotel_Name = "Hotel Arena"
 # necesario inicializar a parametro de entrada del programa  argv[2]
-distancia = sys.argv[2]
-#distancia = 100
+#distancia = sys.argv[2]
+distancia = 100
 # busca la primera fila del hotel y obtiene coordenadas del centro del circulo
 hotelFirstRow = reviewsdf.filter(col("Hotel_Name") == hotel_Name).first()
 latitudectr = float (hotelFirstRow[-2])
@@ -65,7 +65,7 @@ def mlib_naivebayeclf_ngram(input_array):
 	ngramData = ngram.transform(wordsData)
 
 	cv = CountVectorizer(inputCol="ngrams", outputCol="rawFeatures", minDF=2.0)
-	cvModel = cv.fit(wordsData)
+	cvModel = cv.fit(ngramData)
 	featurizedData = cvModel.transform(ngramData)
 
 	idf = IDF(inputCol="rawFeatures", outputCol="features")
@@ -79,7 +79,7 @@ def mlib_naivebayeclf_ngram(input_array):
 
 	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
 
-	output_df = pd.DataFrame(array, columns=["word", "negative", "positive"])
+	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
 	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
 
 	return output_df
@@ -107,7 +107,7 @@ def mlib_naivebayeclf(input_array):
 
 	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
 
-	output_df = pd.DataFrame(array, columns=["word", "negative", "positive"])
+	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
 	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
 
 	return output_df
@@ -133,14 +133,14 @@ df_ngram = mlib_naivebayeclf_ngram(sentenceData)
 
 #df.sort_values(by=['positive'], inplace=True, ascending = False)
 df_ngram.sort_values(by=['positive'], inplace=True, ascending = False)
-#result_positive = df['word'][:20].append(df_ngram['word'][:20])
-result_positive = df_ngram['word'][:20]
+#result_positive = df['words'][:20].append(df_ngram['words'][:20])
+result_positive = df_ngram['words'][:20]
 result_positive.to_csv('relevantes_positive.csv', header=False, index=False)
 
 #df.sort_values(by=['negative'], inplace=True, ascending = False)
 df_ngram.sort_values(by=['negative'], inplace=True, ascending = False)
-#result_positive = df['word'][:20].append(df_ngram['word'][:20])
-result_positive = df_ngram['word'][:20]
+#result_positive = df['words'][:20].append(df_ngram['words'][:20])
+result_positive = df_ngram['words'][:20]
 result_positive.to_csv('relevantes_negative.csv', header=False, index=False)
 
 
@@ -171,4 +171,5 @@ result_positive.to_csv('relevantes_positive_MEJORES.csv', header=False, index=Fa
 #Patron 5
 tagsrdd = filtereddf.withColumn("Tags", regexp_replace(col("Tags"), "[\[\]']", "")).select("Tags").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split(",")).map(lambda x: (str(x.lower()).strip().capitalize(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
 tagsrdd.coalesce(1).toDF().withColumnRenamed("_1", "Tags").withColumnRenamed("_2", "Count").write.format("csv").save("patron5.csv")
+
 
