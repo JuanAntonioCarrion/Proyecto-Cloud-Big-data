@@ -1,7 +1,7 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-from pyspark.ml.feature import IDF, Tokenizer, RegexTokenizer, StopWordsRemover, CountVectorizer
+from pyspark.ml.feature import IDF, Tokenizer, RegexTokenizer, StopWordsRemover, CountVectorizer, NGram
 from pyspark.ml.classification import NaiveBayes
 import string
 import sys
@@ -52,6 +52,64 @@ filteredrdd = reviewsrdd.filter(lambda x: HaversineDistance(latitudectr, float(x
 filtereddf = filteredrdd.toDF()
 
 
+def mlib_naivebayeclf_ngram(input_array):
+
+	tokenizer = RegexTokenizer(inputCol="sentence", outputCol="words", pattern="\\W")
+	wordsData = tokenizer.transform(sentenceData)
+
+	remover = StopWordsRemover(inputCol="words", outputCol="filtered")
+	wordsData = remover.transform(wordsData)
+
+	ngram = NGram(n=2, inputCol="filtered", outputCol="ngrams")
+	ngramDataFrame = ngram.transform(wordDataFrame)
+
+	cv = CountVectorizer(inputCol="ngrams", outputCol="rawFeatures", minDF=2.0)
+	cvModel = cv.fit(wordsData)
+	featurizedData = cvModel.transform(wordsData)
+
+	idf = IDF(inputCol="rawFeatures", outputCol="features")
+	idfModel = idf.fit(featurizedData)
+	rescaledData = idfModel.transform(featurizedData)
+
+	train = rescaledData.select(['label', 'features'])
+
+	nb = NaiveBayes(smoothing=1.0, modelType="multinomial")
+	nbModel = nb.fit(train)
+
+	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
+
+	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
+	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
+
+	return output_df
+
+def mlib_naivebayeclf(input_array):
+
+	tokenizer = RegexTokenizer(inputCol="sentence", outputCol="words", pattern="\\W")
+	wordsData = tokenizer.transform(sentenceData)
+
+	remover = StopWordsRemover(inputCol="words", outputCol="filtered")
+	wordsData = remover.transform(wordsData)
+
+	cv = CountVectorizer(inputCol="filtered", outputCol="rawFeatures", minDF=2.0)
+	cvModel = cv.fit(wordsData)
+	featurizedData = cvModel.transform(wordsData)
+
+	idf = IDF(inputCol="rawFeatures", outputCol="features")
+	idfModel = idf.fit(featurizedData)
+	rescaledData = idfModel.transform(featurizedData)
+
+	train = rescaledData.select(['label', 'features'])
+
+	nb = NaiveBayes(smoothing=1.0, modelType="multinomial")
+	nbModel = nb.fit(train)
+
+	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
+
+	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
+	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
+
+	return output_df
 
 # Patron 1
 filtereddf.createOrReplaceTempView("temp")
@@ -70,36 +128,17 @@ positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("P
 
 sentenceData = positive_revw.union(negative_revw)
 
-tokenizer = RegexTokenizer(inputCol="sentence", outputCol="words", pattern="\\W")
-wordsData = tokenizer.transform(sentenceData)
+df = mlib_naivebayeclf(sentenceData)
+df_ngram = mlib_naivebayeclf_ngram(sentenceData)
 
-remover = StopWordsRemover(inputCol="words", outputCol="filtered")
-wordsData = remover.transform(wordsData)
-
-cv = CountVectorizer(inputCol="filtered", outputCol="rawFeatures", minDF=1.0)
-cvModel = cv.fit(wordsData)
-featurizedData = cvModel.transform(wordsData)
-
-idf = IDF(inputCol="rawFeatures", outputCol="features")
-idfModel = idf.fit(featurizedData)
-rescaledData = idfModel.transform(featurizedData)
-
-train = rescaledData.select(['label', 'features'])
-
-nb = NaiveBayes(smoothing=1.0, modelType="multinomial")
-nbModel = nb.fit(train)
-
-array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
-
-df = pd.DataFrame(array, columns=["words", "negative", "positive"])
-df[["negative", "positive"]] = df[["negative", "positive"]].astype(float)
-
+df_ngram.sort_values(by=['positive'], inplace=True, ascending = False)
 df.sort_values(by=['positive'], inplace=True, ascending = False)
-result_positive = df['words'][:20]
+result_positive = df['words'][:20].append(df_ngram['ngrams'][:20])
 result_positive.to_csv('relevantes_positive.csv', header=False, index=False)
 
 df.sort_values(by=['negative'], inplace=True, ascending = False)
-result_positive = df['words'][:20]
+df_ngram.sort_values(by=['negative'], inplace=True, ascending = False)
+result_positive = df['words'][:20].append(df_ngram['ngrams'][:20])
 result_positive.to_csv('relevantes_negative.csv', header=False, index=False)
 
 
@@ -115,29 +154,7 @@ positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("P
 
 sentenceData = positive_revw.union(negative_revw)
 
-tokenizer = RegexTokenizer(inputCol="sentence", outputCol="words", pattern="\\W")
-wordsData = tokenizer.transform(sentenceData)
-
-remover = StopWordsRemover(inputCol="words", outputCol="filtered")
-wordsData = remover.transform(wordsData)
-
-cv = CountVectorizer(inputCol="filtered", outputCol="rawFeatures", minDF=1.0)
-cvModel = cv.fit(wordsData)
-featurizedData = cvModel.transform(wordsData)
-
-idf = IDF(inputCol="rawFeatures", outputCol="features")
-idfModel = idf.fit(featurizedData)
-rescaledData = idfModel.transform(featurizedData)
-
-train = rescaledData.select(['label', 'features'])
-
-nb = NaiveBayes(smoothing=1.0, modelType="multinomial")
-nbModel = nb.fit(train)
-
-array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
-
-df = pd.DataFrame(array, columns=["words", "negative", "positive"])
-df[["negative", "positive"]] = df[["negative", "positive"]].astype(float)
+df=mlib_naivebayeclf(sentenceData)
 
 df.sort_values(by=['positive'], inplace=True, ascending = False)
 result_positive = df['words'][:20]
