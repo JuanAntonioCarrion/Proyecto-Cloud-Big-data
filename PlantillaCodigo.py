@@ -60,12 +60,13 @@ def mlib_naivebayeclf_ngram(input_array):
 	remover = StopWordsRemover(inputCol="words", outputCol="filtered")
 	wordsData = remover.transform(wordsData)
 
+	# ngram
 	ngram = NGram(n=2, inputCol="filtered", outputCol="ngrams")
-	ngramDataFrame = ngram.transform(wordDataFrame)
+	ngramData = ngram.transform(wordsData)
 
 	cv = CountVectorizer(inputCol="ngrams", outputCol="rawFeatures", minDF=2.0)
 	cvModel = cv.fit(wordsData)
-	featurizedData = cvModel.transform(wordsData)
+	featurizedData = cvModel.transform(ngramData)
 
 	idf = IDF(inputCol="rawFeatures", outputCol="features")
 	idfModel = idf.fit(featurizedData)
@@ -78,7 +79,7 @@ def mlib_naivebayeclf_ngram(input_array):
 
 	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
 
-	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
+	output_df = pd.DataFrame(array, columns=["word", "negative", "positive"])
 	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
 
 	return output_df
@@ -106,7 +107,7 @@ def mlib_naivebayeclf(input_array):
 
 	array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
 
-	output_df = pd.DataFrame(array, columns=["words", "negative", "positive"])
+	output_df = pd.DataFrame(array, columns=["word", "negative", "positive"])
 	output_df[["negative", "positive"]] = output_df[["negative", "positive"]].astype(float)
 
 	return output_df
@@ -128,17 +129,18 @@ positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("P
 
 sentenceData = positive_revw.union(negative_revw)
 
-df = mlib_naivebayeclf(sentenceData)
 df_ngram = mlib_naivebayeclf_ngram(sentenceData)
 
+#df.sort_values(by=['positive'], inplace=True, ascending = False)
 df_ngram.sort_values(by=['positive'], inplace=True, ascending = False)
-df.sort_values(by=['positive'], inplace=True, ascending = False)
-result_positive = df['words'][:20].append(df_ngram['ngrams'][:20])
+#result_positive = df['word'][:20].append(df_ngram['word'][:20])
+result_positive = df_ngram['word'][:20]
 result_positive.to_csv('relevantes_positive.csv', header=False, index=False)
 
-df.sort_values(by=['negative'], inplace=True, ascending = False)
+#df.sort_values(by=['negative'], inplace=True, ascending = False)
 df_ngram.sort_values(by=['negative'], inplace=True, ascending = False)
-result_positive = df['words'][:20].append(df_ngram['ngrams'][:20])
+#result_positive = df['word'][:20].append(df_ngram['word'][:20])
+result_positive = df_ngram['word'][:20]
 result_positive.to_csv('relevantes_negative.csv', header=False, index=False)
 
 
