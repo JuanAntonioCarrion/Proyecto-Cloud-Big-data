@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pandas as pd
 
-conf = SparkConf().setMaster('local[*]').setAppName('plantilla.py')  #cambiar por nombre de app
+conf = SparkConf().setMaster('local[*]').setAppName('Hoteles.py')  #cambiar por nombre de app
 sc = SparkContext(conf = conf)
 spark = SparkSession(sc)
 
@@ -48,9 +48,7 @@ longitudectr = float(hotelFirstRow[-1])
 # filtramos los hoteles en el area
 
 reviewsrdd = reviewsdf.rdd
-
 filteredrdd = reviewsrdd.filter(lambda x: HaversineDistance(latitudectr, float(x[-2]), longitudectr, float(x[-1])) <= distancia)
-
 filtereddf = filteredrdd.toDF()
 
 
@@ -58,14 +56,17 @@ filtereddf = filteredrdd.toDF()
 # Patron 1
 filtereddf.createOrReplaceTempView("temp")
 ret  = spark.sql("select Hotel_Address,Hotel_Name,lat,lng,Average_Score,avg(Reviewer_Score),avg(Total_Number_of_Reviews_Reviewer_Has_Given),Reviewer_Nationality,count(Reviewer_Nationality) as Num_Client_of_Nationality from temp group by Hotel_Address,Reviewer_Nationality,Hotel_Name,lat,lng,Average_Score order by Hotel_Name ASC").coalesce(1).write.format("csv").option("header","true").save(hotel_Name + " " + str(distancia))
+#preguntar
+nationalityrdd = filtereddf.select("Reviewer_Nationality").rdd.map(lambda x: x[0]).map(lambda x: (str(x).strip(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
+nationalityrdd.coalesce(1).toDF().withColumnRenamed("_1", "Reviewer Nationality").withColumnRenamed("_2", "Count").write.format("csv").save("patron1.csv")
 
 
 
 # Patron 2 y Patron 3
 positive_revw = filtereddf.select("Positive_Review").filter(col("Positive_Review") != "No Positive")
 negative_revw = filtereddf.select("Negative_Review").filter(col("Negative_Review") != "No Negative")
-negative_revw = negative_revw.withColumn("label", lit(0.0)).withColumnRenamed("Negative", "sentence")
-positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("Positive", "sentence")
+negative_revw = negative_revw.withColumn("label", lit(0.0)).withColumnRenamed("Negative_Review", "sentence")
+positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("Positive_Review", "sentence")
 
 sentenceData = positive_revw.union(negative_revw)
 
@@ -107,15 +108,48 @@ result_positive.to_csv('relevantes_negative.csv', header=False, index=False)
 hotelAvgRating = float(hotelFirstRow[3])
 higherRatingdf = filtereddf.filter(col("Average_Score") > hotelAvgRating)
 
-#word counter o patron 2
-#wordsrdd = higherRatingdf.select("Positive_Review").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split()).map(lambda x: (str(x.lower()), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
-#wordsrdd.saveAsTextFile("patron4.txt")
+positive_revw = higherRatingdf.select("Positive_Review").filter(col("Positive_Review") != "No Positive")
+negative_revw = higherRatingdf.select("Negative_Review").filter(col("Negative_Review") != "No Negative")
+negative_revw = negative_revw.withColumn("label", lit(0.0)).withColumnRenamed("Negative_Review", "sentence")
+positive_revw = positive_revw.withColumn("label", lit(1.0)).withColumnRenamed("Positive_Review", "sentence")
+
+sentenceData = positive_revw.union(negative_revw)
+
+tokenizer = RegexTokenizer(inputCol="sentence", outputCol="words", pattern="\\W")
+wordsData = tokenizer.transform(sentenceData)
+
+remover = StopWordsRemover(inputCol="words", outputCol="filtered")
+wordsData = remover.transform(wordsData)
+
+cv = CountVectorizer(inputCol="filtered", outputCol="rawFeatures", minDF=1.0)
+cvModel = cv.fit(wordsData)
+featurizedData = cvModel.transform(wordsData)
+
+idf = IDF(inputCol="rawFeatures", outputCol="features")
+idfModel = idf.fit(featurizedData)
+rescaledData = idfModel.transform(featurizedData)
+
+train = rescaledData.select(['label', 'features'])
+
+nb = NaiveBayes(smoothing=1.0, modelType="multinomial")
+nbModel = nb.fit(train)
+
+array = np.asarray(zip(cvModel.vocabulary, nbModel.theta.toArray()[0], nbModel.theta.toArray()[1]))
+
+df = pd.DataFrame(array, columns=["words", "negative", "positive"])
+df[["negative", "positive"]] = df[["negative", "positive"]].astype(float)
+
+df.sort_values(by=['positive'], inplace=True, ascending = False)
+result_positive = df['words'][:20]
+result_positive.to_csv('relevantes_positive_MEJORES.csv', header=False, index=False)
+
+#df.sort_values(by=['negative'], inplace=True, ascending = False)
+#result_positive = df['words'][:20]
+#result_positive.to_csv('relevantes_negative_MEJORES.csv', header=False, index=False)
+
 
 
 #Patron 5
-
-tagsdf = higherRatingdf.select("Hotel_Name","Tags","Average_Score").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split()).map(lambda x: (str(x.lower()), 1)).reduceByKey(lambda x,y : x+y).groupBy(higherRatingdf.Hotel_Name)
-tagsdf.toDF().coalesce(1).write.format("csv").option("header","true").save(hotel_Name + " TAGS " + str(distancia))
-
-
+tagsrdd = filtereddf.withColumn("Tags", regexp_replace(col("Tags"), "[\[\]']", "")).select("Tags").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split(",")).map(lambda x: (str(x.lower()).strip().capitalize(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
+tagsrdd.coalesce(1).toDF().withColumnRenamed("_1", "Tags").withColumnRenamed("_2", "Count").write.format("csv").save("patron5.csv")
 
