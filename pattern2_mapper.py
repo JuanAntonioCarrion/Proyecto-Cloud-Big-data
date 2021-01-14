@@ -82,7 +82,8 @@ def map_parameters(index_list, max_dist):
 				for word in list_output:
 					if ("\t" in word):
 						word = word.replace("\t","")
-					print(word.lower(),"\t", 1)
+					if (word != "" and word != " " and word != "  "):
+						print(word.lower(),"\t", 1)
 
 		else:
 			primera_linea = False
