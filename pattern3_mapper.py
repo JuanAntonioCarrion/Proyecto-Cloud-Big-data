@@ -28,8 +28,8 @@ def map_parameters(index_list, max_dist):
 	index = 0
 	detenido = False
 
-	latitud_orig = float(str(sys.argv[1]))
-	longitud_orig = float(str(sys.argv[2]))
+	latitud_orig = 52.0
+	longitud_orig = 5.0
 	latitud_nueva = 0.0
 	longitud_nueva = 0.0
 	primera_linea = True
@@ -82,11 +82,12 @@ def map_parameters(index_list, max_dist):
 				for word in list_output:
 					if ("\t" in word):
 						word = word.replace("\t","")
-					print(word.lower(),"\t", 1)
+					if (word != "" and word != " " and word != "  "):
+						print word.lower(),'\t', 1
 
 		else:
 			primera_linea = False
 
-max_dist = str(sys.argv[2])
+max_dist = 300
 index_list = [6]
 map_parameters(index_list, max_dist)

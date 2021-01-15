@@ -8,7 +8,7 @@ previous = None
 counter = 0
 
 for line in sys.stdin:
-    key, value = line.split( "\t" )
+    key, value = line.split( '\t' )
     
     if key != previous:
         if previous is not None:

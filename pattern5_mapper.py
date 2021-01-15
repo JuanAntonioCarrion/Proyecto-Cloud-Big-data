@@ -84,7 +84,7 @@ def map_parameters(index_list, max_dist):
 					word = word.replace("[","")
 					word = word.replace("]","")
 					word = word.replace(" ", "")
-					print(word.lower(),"\t", 1)
+					print word.lower(),'\t', 1
 		else:
 			primera_linea = False
 
