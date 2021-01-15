@@ -12,10 +12,10 @@ for line in sys.stdin:
     
     if key != previous:
         if previous is not None:
-            print (previous+ ',' + str(counter))
+            print previous, ',' , str(counter)
         previous = key
         counter = 0
     
     counter += int(value)
 
-print (previous+ ',' + str(counter))
+print previous, ',' , str(counter)
