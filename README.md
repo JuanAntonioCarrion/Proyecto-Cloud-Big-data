@@ -1,14 +1,14 @@
 # Requisitos
 
 * Sistema Operativo Linux
-* Python 3 
+* Python 2.7 
 * Apache Spark
 
 # Instalación en Ubuntu
 
 ## Python
 ```bash
-$ sudo apt-get install python3
+$ sudo apt-get install python2.7
 ```
 
 ## Spark
@@ -28,11 +28,11 @@ $ source ~/.profile
 
 # Ejecución
 
-En el caso de querer ejecutarlo en local, se debe ejecutar un comando como el siguiente:
+En el caso de querer ejecutar los scripts de Spark en local, se debe ejecutar un comando como el siguiente:
 ```bash
-$ spark-submit ____ arg1 arg2 
+$ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
-
+	* Sólo para pattern_4.py
 En el caso de querer ejecutarlo en un cluster, se debería ejecutar lo siguiente:
 ```bash
 $ spark-submit --num-executors N --executor-cores M _____ arg1 arg2
