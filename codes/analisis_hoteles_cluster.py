@@ -21,7 +21,7 @@ conf = SparkConf().setAppName('Hoteles.py')  #cambiar por nombre de app
 sc = SparkContext(conf = conf)
 spark = SparkSession(sc)
 
-reviewsdf = spark.read.option("header",True).option("inferSchema","true").csv("../dataset/Hotel_Reviews.csv")
+reviewsdf = spark.read.option("header",True).option("inferSchema","true").csv("Hotel_Reviews_Large.csv")
 
 reviewsdf = reviewsdf.filter((col("lat") != "NA") & (col("lng")!= "NA"))  # Eliminar las reviews con coordenadas invalidas
 
