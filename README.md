@@ -47,4 +47,5 @@ Para ejecutar los scripts de *MapReduce* en modo local, se ejecuta el siguiente 
 ```bash
 $ ./<nombre_mapper> <latitud> <longitud> <distancia> <min_avg*> < Hotel_Reviews_Large.csv | sort | ./<nombre_reducer>
 ```
+Para ejecutarlos en un cluster, se recomienda utilizar la interfaz proporcionada por EMR, pasando como mapper el comando adecuado con sus argumentos, y especificando el path del mismo con la opcion *-files* en la sección de argumentos.
 \*min_avg sólo se necesita para el patrón 4.
