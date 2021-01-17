@@ -36,7 +36,7 @@ En el caso de querer ejecutarlos en un cluster, se debe ejecutar lo siguiente:
 ```bash
 $ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
-* Sólo para pattern_4.py
+* <min_avg*> sólo se necesita en pattern_4.py
 
 En el caso de querer ejecutar la aplicación avanzada:
 ```bash
