@@ -10,15 +10,15 @@ import re
 import math
 
 # necesario inicializar a parametro de entrada del programa  argv[1] 
-#if (sys.argv[1]):
-#	hotel_Name = sys.argv[1]   
+if (sys.argv[1]):
+	hotel_Name = sys.argv[1]   
 #else:
-hotel_Name = "Hotel Arena"
+#hotel_Name = "Hotel Arena"
 # necesario inicializar a parametro de entrada del programa  argv[2]
-#if (sys.argv[2]):
-#	distancia = sys.argv[2]
+if (sys.argv[2]):
+	distancia = sys.argv[2]
 #else:
-distancia = 100
+#distancia = 100
 
 conf = SparkConf().setMaster('local[*]').setAppName('Hoteles.py')  #cambiar por nombre de app
 sc = SparkContext(conf = conf)
