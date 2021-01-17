@@ -47,4 +47,4 @@ Para ejecutar los scripts de *MapReduce* en modo local, se ejecuta el siguiente 
 ```bash
 $ ./<nombre_mapper> <latitud> <longitud> <distancia> <min_avg*> < Hotel_Reviews_Large.csv | sort | ./<nombre_reducer>
 ```
-** <min_avg> sólo se necesita en pattern_4.py
+\*<min_avg> sólo se necesita para el patrón 4.
