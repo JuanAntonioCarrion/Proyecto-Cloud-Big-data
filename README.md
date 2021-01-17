@@ -3,12 +3,32 @@
 * Sistema Operativo Linux
 * Python 2.7 
 * Apache Spark
+* Java
+* Scala
+* Numpy
 
-# Instalación en Ubuntu
+# Instalación en una instancia EC2 de AWS - Ubuntu Server 18.04 LTS
+
+## Java
+```bash
+$ sudo apt-get update
+$ sudo apt install default-jre
+```
+
+## Scala
+```bash
+$ sudo apt-get install scala
+```
 
 ## Python
 ```bash
-$ sudo apt-get install python2.7
+$ sudo apt-get install python
+```
+
+## Numpy
+```bash
+$ sudo apt-get install python-pip
+$ sudo pip install numpy
 ```
 
 ## Spark
