@@ -9,16 +9,13 @@ import sys
 import re
 import math
 
-# necesario inicializar a parametro de entrada del programa  argv[1] 
-#if (sys.argv[1]):
-#	hotel_Name = sys.argv[1]   
-#else:
-hotel_Name = "Hotel Arena"
-# necesario inicializar a parametro de entrada del programa  argv[2]
-#if (sys.argv[2]):
-#	distancia = sys.argv[2]
-#else:
-distancia = 100
+# necesario inicializar a parametro de entrada del programa argv[1] argv[2] 
+if len(sys.argv) == 2:
+	hotel_Name = sys.argv[1] 
+	distancia = sys.argv[2]
+else:
+	hotel_Name = "Hotel Arena"
+	distancia = 100
 
 conf = SparkConf().setMaster('local[*]').setAppName('Hoteles.py')  #cambiar por nombre de app
 sc = SparkContext(conf = conf)
@@ -151,9 +148,9 @@ sentenceData = positive_revw.union(negative_revw)
 
 df_ngram = mlib_naivebayeclf_ngram(sentenceData)
 
-df_ngram.sort(desc('positive')).select("words").write.format("csv").save("patron2.csv")
+df_ngram.sort(desc('positive')).select("words").coalesce(1).write.format("csv").save("patron2.csv")
 
-df_ngram.sort(desc('negative')).select("words").write.format("csv").save("patron3.csv")
+df_ngram.sort(desc('negative')).select("words").coalesce(1).write.format("csv").save("patron3.csv")
 
 # Patron 4: Aspectos importantes competencias a su alrededor
 # filtrado
@@ -169,7 +166,7 @@ sentenceData = positive_revw.union(negative_revw)
 
 df=mlib_naivebayeclf(sentenceData)
 
-df.sort(desc('positive')).select("words").write.format("csv").save("patron4.csv")
+df.sort(desc('positive')).select("words").coalesce(1).write.format("csv").save("patron4.csv")
 
 #Patron 5
 tagsrdd = filtereddf.withColumn("Tags", regexp_replace(col("Tags"), "[\[\]']", "")).select("Tags").rdd.map(lambda x: x[0]).flatMap(lambda line: line.split(",")).map(lambda x: (str(x.lower()).strip().capitalize(), 1)).reduceByKey(lambda x,y : x+y).sortBy(lambda x: x[1], False)
