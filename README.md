@@ -36,7 +36,7 @@ En el caso de querer ejecutarlos en un cluster, se debe ejecutar lo siguiente:
 ```bash
 $ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
-* <min_avg*> sólo se necesita en pattern_4.py
+
 
 En el caso de querer ejecutar la aplicación con las funciones avanzadas:
 ```bash
@@ -47,4 +47,4 @@ Para ejecutar los scripts de *MapReduce* en modo local, se ejecuta el siguiente 
 ```bash
 $ ./<nombre_mapper> <latitud> <longitud> <distancia> <min_avg*> < Hotel_Reviews_Large.csv | sort | ./<nombre_reducer>
 ```
-
+** <min_avg> sólo se necesita en pattern_4.py
