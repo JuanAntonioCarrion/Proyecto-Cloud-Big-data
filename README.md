@@ -28,7 +28,7 @@ $ source ~/.profile
 
 # Ejecución
 
-En el caso de querer ejecutar los scripts de Spark en local, se debe ejecutar un comando como el siguiente:
+En el caso de querer ejecutar los scripts de *Spark* en local, se debe ejecutar un comando como el siguiente:
 ```bash
 $ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
@@ -38,7 +38,7 @@ $ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <l
 ```
 * <min_avg*> sólo se necesita en pattern_4.py
 
-En el caso de querer ejecutar la aplicación avanzada:
+En el caso de querer ejecutar la aplicación con las funciones avanzadas:
 ```bash
 $ spark-submit <nombre_script> <nombre_hotel> <distancia> 
 ```
