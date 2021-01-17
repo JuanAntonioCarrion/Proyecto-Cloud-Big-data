@@ -32,10 +32,15 @@ En el caso de querer ejecutar los scripts de Spark en local, se debe ejecutar un
 ```bash
 $ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
-	* Sólo para pattern_4.py
-En el caso de querer ejecutarlo en un cluster, se debería ejecutar lo siguiente:
+En el caso de querer ejecutarlos en un cluster, se debe ejecutar lo siguiente:
 ```bash
-$ spark-submit --num-executors N --executor-cores M _____ arg1 arg2
+$ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
+```
+* Sólo para pattern_4.py
+
+En el caso de querer ejecutar la aplicación avanzada:
+```bash
+$ spark-submit <nombre_script> <nombre_hotel> <distancia> 
 ```
 	
 
