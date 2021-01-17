@@ -28,7 +28,7 @@ $ source ~/.profile
 
 # Ejecución
 
-En el caso de querer ejecutar los scripts de *Spark* en local, se debe ejecutar un comando como el siguiente:
+En el caso de querer ejecutar los scripts de -Spark- en local, se debe ejecutar un comando como el siguiente:
 ```bash
 $ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
