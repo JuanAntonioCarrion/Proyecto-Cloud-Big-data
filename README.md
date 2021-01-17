@@ -28,7 +28,7 @@ $ source ~/.profile
 
 # Ejecución
 
-En el caso de querer ejecutar los scripts de -Spark- en local, se debe ejecutar un comando como el siguiente:
+En el caso de querer ejecutar los scripts de *Spark* en local, se debe ejecutar un comando como el siguiente:
 ```bash
 $ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
@@ -42,6 +42,9 @@ En el caso de querer ejecutar la aplicación con las funciones avanzadas:
 ```bash
 $ spark-submit <nombre_script> <nombre_hotel> <distancia> 
 ```
-	
 
+Para ejecutar los scripts de *MapReduce* en modo local, se ejecuta el siguiente comando:
+```bash
+$ ./<nombre_mapper> <latitud> <longitud> <distancia> <min_avg*> < Hotel_Reviews_Large.csv | sort | ./<nombre_reducer>
+```
 
