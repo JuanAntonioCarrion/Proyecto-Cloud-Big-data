@@ -37,7 +37,6 @@ En el caso de querer ejecutarlos en un cluster, se debe ejecutar lo siguiente:
 $ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
 
-
 En el caso de querer ejecutar la aplicación con las funciones avanzadas:
 ```bash
 $ spark-submit <nombre_script> <nombre_hotel> <distancia> 
@@ -49,4 +48,4 @@ $ ./<nombre_mapper> <latitud> <longitud> <distancia> <min_avg*> < Hotel_Reviews_
 ```
 Para ejecutarlos en un cluster, se recomienda utilizar la interfaz proporcionada por EMR, pasando como mapper el comando adecuado con sus argumentos, y especificando el path del mismo con la opcion *-files* en la sección de argumentos.
 
- #\*min_avg sólo se necesita para el patrón 4.
+\***min_avg** sólo se necesita para el patrón 4.
