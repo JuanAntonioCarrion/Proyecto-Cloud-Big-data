@@ -57,9 +57,15 @@ En el caso de querer ejecutarlos en un cluster, se debe ejecutar lo siguiente:
 $ spark-submit --num-executors N --executor-cores M <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
 ```
 
-En el caso de querer ejecutar la aplicación con las funciones avanzadas:
+En el caso de querer ejecutar la aplicación con las funciones avanzadas local:
 ```bash
-$ spark-submit <nombre_script> <nombre_hotel> <distancia> 
+$ spark-submit analisis_hoteles_local.py <nombre_hotel> <distancia> 
+$ Ejemplos de hoteles 'K K Hotel George' 'Hotel Arena'
+```
+En el caso de querer ejecutar la aplicación con las funciones avanzadas en cluster:
+```bash
+$ spark-submit analisis_hoteles_cluster.py <nombre_hotel> <distancia> 
+$ Ejemplos de hoteles 'K K Hotel George' 'Hotel Arena'
 ```
 
 Para ejecutar los scripts de *MapReduce* en modo local, se ejecuta el siguiente comando:
