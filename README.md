@@ -48,6 +48,8 @@ $ source ~/.profile
 
 # Ejecución
 
+### Descomprimir dataset/Hoteles_reviews.csv.zip para obtener el dataset 
+
 En el caso de querer ejecutar los scripts de *Spark* en local, se debe ejecutar un comando como el siguiente:
 ```bash
 $ spark-submit <nombre_script> <latitud> <longitud> <distancia> <min_avg*>
